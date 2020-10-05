@@ -12,37 +12,42 @@ namespace testeBanco
     {
         static void Main(string[] args)
         {
+            //iniciar banco
             IMGContext Db = new IMGContext();
             Db.Iniciar();
 
-            Console.WriteLine("Lembre de alterar o diretório do arquivo");
-            string DirArquivo = @"C:\Users\João Pedro\Desktop\";
-            //using (WebClient cliente = new WebClient())
-            //{
-            //    cliente.DownloadFile("https://www.petz.com.br/blog/wp-content/uploads/2019/04/como-cuidar-de-um-coelho-filhote.jpg", DirArquivo);
-            //}
+            Console.WriteLine("Lembre de alterar o diretório do arquivo \ne string de conexão do banco");
+           //diretórios para salvar a imagem
+            string DirArquivo1 = @"C:\Users\João Pedro\Desktop\";
+            string DirArquivo2 = @"C:\Users\João Pedro\Downloads\";
+            string DirCompleto = DirArquivo1 + "Coelho.png";
+            
+            //fazendo o download da imagem pela internet
+            using (WebClient cliente = new WebClient())
+            {
+                cliente.DownloadFile("https://www.petz.com.br/blog/wp-content/uploads/2019/04/como-cuidar-de-um-coelho-filhote.jpg", DirCompleto);
+            }
+            Console.WriteLine("baixou");
 
-            //Console.WriteLine("baixou");
+            //salvando no banco de dados
+            Image img = Image.FromFile(DirCompleto);
+            String nome = "Coelho";
+            var i = new ObjImagem
+            {
+                Imagem = Conversor.ImagemParaByte(img),
+                Nome = nome
+            };
+            Db.Imagens.Add(i);
+            Db.SaveChanges();
+            Console.WriteLine("Salvo no banco");
 
-
-            //Image img = Image.FromFile(DirArquivo);
-            //String nome = "Coelho";
-
-            //var i = new ObjImagem
-            //{
-            //    Imagem = Conversor.ImagemParaByte(img),
-            //    Nome = nome,
-            //    Id = 1
-            //};
-            //Db.Imagens.Add(i);
-            //Db.SaveChanges();
-            //Console.WriteLine("salvo");
-
+            //recuperando imagem do banco de dados
             var imagens = Db.Imagens.ToList<ObjImagem>();
             foreach(var im in imagens)
             {
-                Image img = Conversor.ByteParaImagem(im.Imagem);
-                img.Save(DirArquivo);
+                Image ImagemDoBanco = Conversor.ByteParaImagem(im.Imagem);
+                ImagemDoBanco.Save(DirArquivo2 + im.Nome + ".png");
+                Console.WriteLine("Salvo em: " + DirArquivo2 + im.Nome + ".png");
 
             }
 
